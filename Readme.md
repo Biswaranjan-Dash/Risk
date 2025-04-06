@@ -8,6 +8,9 @@ Welcome to **Risk Tracker**, a web application designed to monitor and analyze v
 
 - **Purpose**: Track and visualize vehicle risk based on speed, traffic conditions, acceleration, and angular velocity.
 
+
+[![Watch the video](https://drive.google.com/file/d/1J1Aa4FoqZMRXVDm0EZExf7pNFEiNU5ej/view?usp=sharing)]
+
 ### 🧰 Technologies
 
 - **Frontend**: Next.js, TypeScript, Recharts  
