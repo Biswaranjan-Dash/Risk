@@ -2,16 +2,18 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import bcrypt from 'bcryptjs';
+import { authOptions } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
     await dbConnect();
     const data = await request.json();
-    const session = await getServerSession();
+    // const session = await getServerSession();
+    const session = await getServerSession(authOptions); 
 
     // Allow insurance company registration without auth
     if (data.role === 'insurance') {
-      // Validate required fields
       if (!data.email || !data.password || !data.name) {
         return NextResponse.json(
           { error: 'Missing required fields' },
@@ -27,19 +29,21 @@ export async function POST(request: Request) {
         );
       }
 
+      // ✅ Hash the password before saving
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+
       const user = await User.create({
         email: data.email,
-        password: data.password,
+        password: hashedPassword,
         name: data.name,
         role: 'insurance'
       });
 
-      // Remove password from response
       const { password, ...userWithoutPassword } = user.toObject();
       return NextResponse.json(userWithoutPassword);
     }
 
-    // For customer creation, require insurance company authentication
+    // Customer creation — require authenticated insurance session
     if (!session || session.user.role !== 'insurance') {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -47,7 +51,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate required fields for customer
     if (!data.vehicleNumber || !data.password || !data.name) {
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -63,12 +66,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // ✅ Hash customer password too
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
     const user = await User.create({
       ...data,
+      password: hashedPassword,
       role: 'customer'
     });
 
-    // Remove password from response
     const { password, ...userWithoutPassword } = user.toObject();
     return NextResponse.json(userWithoutPassword);
   } catch (error) {
