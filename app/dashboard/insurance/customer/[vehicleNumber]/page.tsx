@@ -78,7 +78,7 @@ export default function CustomerDetails({
         setVehicleData(data);
         
         if (data.length > 0) {
-          const avgRisk = data.reduce((acc, curr) => acc + curr.riskScore, 0) / data.length;
+          const avgRisk = vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.riskScore, 0) / data.length;
           setRiskScore(Math.round(avgRisk));
         }
       } catch (error) {

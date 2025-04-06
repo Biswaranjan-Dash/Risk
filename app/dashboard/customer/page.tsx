@@ -20,6 +20,8 @@ import {
   Activity,
   ThermometerSun,
   LogOut,
+  MessageSquare,
+  Send,
 } from "lucide-react";
 
 interface VehicleData {
@@ -29,10 +31,21 @@ interface VehicleData {
   timestamp: string;
 }
 
+interface ChatMessage {
+  id: number;
+  text: string;
+  isUser: boolean;
+}
+
 export default function CustomerDashboard() {
   const { data: session } = useSession();
   const [vehicleData, setVehicleData] = useState<VehicleData[]>([]);
   const [riskScore, setRiskScore] = useState(0);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { id: 1, text: "Hello! How can I assist you today?", isUser: false },
+  ]);
+  const [newMessage, setNewMessage] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -42,7 +55,6 @@ export default function CustomerDashboard() {
           `/api/vehicle-data/${session.user.vehicleNumber}`
         );
         const data = await response.json();
-        // Sort data by timestamp in ascending order
         const sortedData = data.sort(
           (a: VehicleData, b: VehicleData) =>
             new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -51,7 +63,7 @@ export default function CustomerDashboard() {
 
         if (sortedData.length > 0) {
           const avgRisk =
-          vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.riskScore, 0) /
+            sortedData.reduce((acc: number, curr: VehicleData) => acc + curr.riskScore, 0) /
             sortedData.length;
           setRiskScore(Math.round(avgRisk));
         }
@@ -66,6 +78,30 @@ export default function CustomerDashboard() {
   const handleLogout = async () => {
     await signOut({ redirect: false });
     router.push("/auth/signin");
+  };
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim()) return;
+
+    // Add user's message
+    const userMessage = {
+      id: messages.length + 1,
+      text: newMessage,
+      isUser: true,
+    };
+    setMessages([...messages, userMessage]);
+    
+    // Simulate bot response (you can replace this with an actual API call)
+    setTimeout(() => {
+      const botResponse = {
+        id: messages.length + 2,
+        text: `I received: "${newMessage}". How can I help you with your vehicle data?`,
+        isUser: false,
+      };
+      setMessages((prev) => [...prev, botResponse]);
+    }, 500);
+
+    setNewMessage("");
   };
 
   return (
@@ -109,7 +145,7 @@ export default function CustomerDashboard() {
               <h3 className="text-2xl font-bold">
                 {vehicleData.length > 0
                   ? Math.round(
-                    vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.speed, 0) /
+                      vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.speed, 0) /
                         vehicleData.length
                     )
                   : 0}
@@ -127,7 +163,7 @@ export default function CustomerDashboard() {
               <h3 className="text-2xl font-bold">
                 {vehicleData.length > 0
                   ? Math.round(
-                    vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.brakeForce, 0) /
+                      vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.brakeForce, 0) /
                         vehicleData.length
                     )
                   : 0}%
@@ -176,6 +212,68 @@ export default function CustomerDashboard() {
             </ResponsiveContainer>
           </div>
         </Card>
+
+        {/* Chat Bot Section */}
+        <div className="fixed bottom-4 right-4">
+          {!isChatOpen && (
+            <Button
+              className="rounded-full w-12 h-12 p-0"
+              onClick={() => setIsChatOpen(true)}
+            >
+              <MessageSquare className="h-6 w-6" />
+            </Button>
+          )}
+
+          {isChatOpen && (
+            <Card className="w-96 h-[500px] flex flex-col">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h3 className="font-semibold">Vehicle Assistant</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsChatOpen(false)}
+                >
+                  ×
+                </Button>
+              </div>
+
+              <div className="flex-1 p-4 overflow-y-auto space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.isUser ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[70%] p-3 rounded-lg ${
+                        message.isUser
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {message.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 border-t flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                  placeholder="Type your message..."
+                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button onClick={handleSendMessage}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </Card>
+          )}
+        </div>
       </main>
     </div>
   );

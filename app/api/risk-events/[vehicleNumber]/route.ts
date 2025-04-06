@@ -75,7 +75,7 @@ export async function GET(
         eventTypeCounts: eventTypeCounts || {},
       }
     });
-  } catch (error) {
+  } catch (error : any) {
     console.error('Error fetching risk events:', error);
     return NextResponse.json(
       { error: 'Failed to fetch risk events' },

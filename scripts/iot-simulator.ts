@@ -20,7 +20,7 @@ function getRandomInRange(min: number, max: number): number {
 }
 
 // Generate random vehicle data
-function generateVehicleData(): MLPredictionInput {
+function generateVehicleData(): typeof MLPredictionInput {
   return {
     Speed: getRandomInRange(DATA_RANGES.speed.min, DATA_RANGES.speed.max),
     Traffic_Condition:
@@ -50,9 +50,9 @@ function generateLocation(): { latitude: number; longitude: number } {
 }
 
 // Simulate risky behavior occasionally
-function simulateRiskyBehavior(data: MLPredictionInput): MLPredictionInput {
+function simulateRiskyBehavior(data: typeof MLPredictionInput): typeof MLPredictionInput {
   if (Math.random() < 0.1) {
-    const riskyBehaviors: Array<() => MLPredictionInput> = [
+    const riskyBehaviors: Array<() => typeof MLPredictionInput> = [
       () => ({ ...data, Speed: 130 }), // Overspeeding
       () => ({ ...data, Linear_X: -6 }), // Hard braking
       () => ({ ...data, Angular_Z: 2.5 }), // Sharp turn
@@ -68,7 +68,7 @@ function simulateRiskyBehavior(data: MLPredictionInput): MLPredictionInput {
 // Send data for a vehicle
 async function sendVehicleData(vehicleNumber: string): Promise<void> {
   try {
-    let data: MLPredictionInput = generateVehicleData();
+    let data: typeof MLPredictionInput = generateVehicleData();
     data = simulateRiskyBehavior(data);
 
     const payload = {

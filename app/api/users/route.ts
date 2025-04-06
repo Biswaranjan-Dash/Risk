@@ -77,7 +77,7 @@ export async function POST(request: Request) {
 
     const { password, ...userWithoutPassword } = user.toObject();
     return NextResponse.json(userWithoutPassword);
-  } catch (error) {
+  } catch (error:any) {
     console.error('User creation error:', error);
     return NextResponse.json(
       { error: 'Failed to create user' },
