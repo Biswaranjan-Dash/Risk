@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   LineChart,
   Line,
@@ -13,8 +13,14 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from 'recharts';
-import { AlertCircle, TrendingUp, Activity, ThermometerSun, LogOut } from 'lucide-react';
+} from "recharts";
+import {
+  AlertCircle,
+  TrendingUp,
+  Activity,
+  ThermometerSun,
+  LogOut,
+} from "lucide-react";
 
 interface VehicleData {
   riskScore: number;
@@ -32,12 +38,21 @@ export default function CustomerDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       if (session?.user?.vehicleNumber) {
-        const response = await fetch(`/api/vehicle-data/${session.user.vehicleNumber}`);
+        const response = await fetch(
+          `/api/vehicle-data/${session.user.vehicleNumber}`
+        );
         const data = await response.json();
-        setVehicleData(data);
-        
-        if (data.length > 0) {
-          const avgRisk = data.reduce((acc, curr) => acc + curr.riskScore, 0) / data.length;
+        // Sort data by timestamp in ascending order
+        const sortedData = data.sort(
+          (a: VehicleData, b: VehicleData) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        setVehicleData(sortedData);
+
+        if (sortedData.length > 0) {
+          const avgRisk =
+            sortedData.reduce((acc, curr) => acc + curr.riskScore, 0) /
+            sortedData.length;
           setRiskScore(Math.round(avgRisk));
         }
       }
@@ -50,7 +65,7 @@ export default function CustomerDashboard() {
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
-    router.push('/auth/signin');
+    router.push("/auth/signin");
   };
 
   return (
@@ -128,10 +143,10 @@ export default function CustomerDashboard() {
               <p className="text-sm font-medium text-muted-foreground">Risk Level</p>
               <h3 className="text-2xl font-bold">
                 {riskScore < 30
-                  ? 'Low'
+                  ? "Low"
                   : riskScore < 70
-                  ? 'Medium'
-                  : 'High'}
+                  ? "Medium"
+                  : "High"}
               </h3>
             </div>
           </Card>
