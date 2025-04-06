@@ -51,7 +51,7 @@ export default function CustomerDashboard() {
 
         if (sortedData.length > 0) {
           const avgRisk =
-            sortedData.reduce((acc, curr) => acc + curr.riskScore, 0) /
+          vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.riskScore, 0) /
             sortedData.length;
           setRiskScore(Math.round(avgRisk));
         }
@@ -109,7 +109,7 @@ export default function CustomerDashboard() {
               <h3 className="text-2xl font-bold">
                 {vehicleData.length > 0
                   ? Math.round(
-                      vehicleData.reduce((acc, curr) => acc + curr.speed, 0) /
+                    vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.speed, 0) /
                         vehicleData.length
                     )
                   : 0}
@@ -127,7 +127,7 @@ export default function CustomerDashboard() {
               <h3 className="text-2xl font-bold">
                 {vehicleData.length > 0
                   ? Math.round(
-                      vehicleData.reduce((acc, curr) => acc + curr.brakeForce, 0) /
+                    vehicleData.reduce((acc: number, curr: VehicleData) => acc + curr.brakeForce, 0) /
                         vehicleData.length
                     )
                   : 0}%
